@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Data.SQLite;
 using Playground;
-
+using System.Timers;
 
 // using .Interop.TimeSeries;
 // using Microsoft.Data.Analysis;
@@ -146,17 +146,35 @@ namespace Test
             string stm = string.Format("SELECT * FROM temp t where t.ist_no = {0} LIMIT 10", stationNo);
 
             using var cmd = new SQLiteCommand(stm, con);
-            using SQLiteDataReader rdr = cmd.ExecuteReader();
 
-
-            while (rdr.Read())
+            try
             {
-                // var stationId = rdr.GetDecimal(0);
-                Console.WriteLine("{0} {1} {2} {3} {4} {5} {6}", rdr.GetDecimal(0), rdr.GetString(1), rdr.GetDecimal(2),
-                    rdr.GetDecimal(3), rdr.GetDecimal(4), rdr.GetDecimal(5), rdr.GetString(6));
+                using SQLiteDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    // var stationId = rdr.GetDecimal(0);
+                    Console.WriteLine("{0} {1} {2} {3} {4} {5} {6}", rdr.GetDecimal(0), rdr.GetString(1),
+                        rdr.GetDecimal(2),
+                        rdr.GetDecimal(3), rdr.GetDecimal(4), rdr.GetDecimal(5), rdr.GetString(6));
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            System.Timers.Timer myTimer = new System.Timers.Timer(1000);
+
+            myTimer.Elapsed += MyTimer_Elapsed;
+            myTimer.Start();
         }
 
+        private static void MyTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Console.WriteLine(e.SignalTime);
+        }
 
         static void AddValues(double[] x)
         {
